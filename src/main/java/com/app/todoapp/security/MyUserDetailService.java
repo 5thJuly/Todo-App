@@ -1,24 +1,21 @@
 package com.app.todoapp.security;
 
-import com.app.todoapp.dto.UserLogin;
-import com.app.todoapp.entities.Users; // Ensure this import matches your User entity
+import com.app.todoapp.entities.Users;
 import com.app.todoapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
 public class MyUserDetailService implements UserDetailsService {
+    private static final Logger logger = LoggerFactory.getLogger(MyUserDetailService.class);
     private final UserRepository userRepository;
     private final JWTHelper jwtHelper;
 
@@ -26,30 +23,23 @@ public class MyUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Users user = userRepository.findByEmail(email);
         if (user == null) {
+            logger.error("User not found with email: {}", email);
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
-
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER"); // Replace with actual roles if needed
-
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .authorities(Collections.singletonList(authority))
-                .build();
+        logger.info("Loaded user: {}", email);
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                Collections.emptyList() // No roles needed
+        );
     }
 
-    public String loginToken(UserLogin request) {
-        try {
-            UserDetails userDetails = this.loadUserByUsername(request.getEmail());
-            return jwtHelper.generateToken(userDetails);
-        } catch (AuthenticationException e) {
-            e.printStackTrace();
-            return null;
+    public String generateToken(String email) {
+        Users user = userRepository.findByEmail(email);
+        if (user == null) {
+            logger.error("User not found with email: {}", email);
+            throw new UsernameNotFoundException("User not found with email: " + email);
         }
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public String exceptionHandler() {
-        return "Credentials Invalid !!";
+        return jwtHelper.generateToken(loadUserByUsername(email), Long.valueOf(user.getUserId()));
     }
 }

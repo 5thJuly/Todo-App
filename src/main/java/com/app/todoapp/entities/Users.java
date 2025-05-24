@@ -3,6 +3,7 @@ package com.app.todoapp.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -28,7 +29,19 @@ public class Users {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
+    @Column(name = "profile_img")
+    private String profileImg;
+
+    @Column(name = "uid")
+    private String uid;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
+
+    
 }
