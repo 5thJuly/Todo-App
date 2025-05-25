@@ -39,7 +39,7 @@ public class Todo {
     private String description;
 
     @Column(name = "is_completed", nullable = false)
-    private boolean isCompleted;
+    private Boolean isCompleted;
 
     @Column(name = "due_date")
     private LocalDate dueDate;
