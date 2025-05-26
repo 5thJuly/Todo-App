@@ -1,14 +1,12 @@
 package com.app.todoapp.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LoginResponseDTO {
     private Integer userId;
     private String userName;
@@ -16,4 +14,5 @@ public class LoginResponseDTO {
     private String profileImg;
     private boolean success;
     private String message;
+    private String token;
 }

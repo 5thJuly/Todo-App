@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
                     .build();
 
             Users savedUser = userRepository.save(user);
-            return new LoginResponseDTO(savedUser.getUserId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getProfileImg(), true, "Registration successful");
+            return new LoginResponseDTO(savedUser.getUserId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getProfileImg(), true, "Registration successful", null);
     
             
         } catch (Exception e) {
@@ -91,7 +91,8 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getProfileImg(),
                 true,
-                "Login thành công!!"
+                "Login thành công!!",
+                null
         );
     }
     @Override
@@ -127,7 +128,8 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getProfileImg(),
                 true,
-                message
+                message,
+                null
         );
     }
 
