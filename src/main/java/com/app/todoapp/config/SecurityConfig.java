@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .addFilterBefore(corsFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class) // Add CORS filter
                 .authorizeHttpRequests(authorize -> authorize
                         // Public endpoints for registration and other TodoApp routes
-                        .requestMatchers("/*/*/register", "/api/*/login","/api/*/google", "/logout", "/forgot-password", "/reset-password",
+                        .requestMatchers("/*/*/register", "/api/*/login","/api/*/google", "api/*/forgot-password", "api/*/reset-password",
                                 "/verify-email", "/resend-verification-email").permitAll()
                         // Public TodoApp endpoints (e.g., view public todos or categories)
                         .requestMatchers("/todos/public", "/todos/categories").permitAll()
