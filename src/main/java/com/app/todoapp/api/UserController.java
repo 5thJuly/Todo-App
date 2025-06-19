@@ -61,18 +61,31 @@ public class UserController {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
 
-        } catch (RuntimeException e) {
-            logger.error("Registration failed: {}", e.getMessage());
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            logger.error("Registration failed - data integrity violation: {}", e.getMessage());
 
             ApiResponse apiResponse = ApiResponse.builder()
                     .success(false)
-                    .message(e.getMessage())
+                    .message("Email đã tồn tại hoặc dữ liệu không hợp lệ.")
                     .data(null)
                     .timestamp(LocalDateTime.now())
                     .path(request.getRequestURI())
                     .build();
 
             return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
+
+        } catch (Exception e) {
+            logger.error("Registration failed - unexpected error: {}", e.getMessage());
+
+            ApiResponse apiResponse = ApiResponse.builder()
+                    .success(false)
+                    .message("Đã xảy ra lỗi không xác định.")
+                    .data(null)
+                    .timestamp(LocalDateTime.now())
+                    .path(request.getRequestURI())
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
 

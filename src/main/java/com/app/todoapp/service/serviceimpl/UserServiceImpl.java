@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    private Map<String, String> resetTokens = new HashMap<>();
+    private final Map<String, String> resetTokens = new HashMap<>();
 
     private static final String GOOGLE_TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=";
 
@@ -56,8 +56,6 @@ public class UserServiceImpl implements UserService {
             if (userRepository.existsByEmail(registrationDTO.getEmail())) {
                 throw new RuntimeException("Email đã tồn tại", new IllegalArgumentException("Email: " + registrationDTO.getEmail()));
             }
-
-            
             Users user = Users.builder()
                     .username(registrationDTO.getUsername())
                     .email(registrationDTO.getEmail())
@@ -117,7 +115,7 @@ public class UserServiceImpl implements UserService {
         } else {
             // Create new user
             user = createNewUserFromGoogle(googleUserInfoDTO);
-            message = "Registration thành công. Vui lòng kiểm tra email để xác thực tài khoản!";
+            message = "Registration thành công. Let's start!";
         }
         // Save user
         user = userRepository.save(user);
@@ -151,7 +149,10 @@ public class UserServiceImpl implements UserService {
 
     private Users createNewUserFromGoogle(GoogleUserInfoDTO googleUser) {
         try {
-            Users user = Users.builder()
+            if (userRepository.existsByEmail(googleUser.getEmail())) {
+                throw new RuntimeException("Email đã tồn tại trong hệ thống");
+            }
+            return Users.builder()
                     .email(googleUser.getEmail())
                     .username(generateUsername(googleUser.getEmail()))
                     .password(passwordEncoder.encode("GOOGLE_AUTH_USER"))
@@ -159,9 +160,6 @@ public class UserServiceImpl implements UserService {
                     .uid(googleUser.getSub())
                     .createdAt(LocalDateTime.now())
                     .build();
-
-
-            return user;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create user from Google data", e);
         }
@@ -235,7 +233,7 @@ public class UserServiceImpl implements UserService {
             
             emailService.sendSimpleEmail(email, subject, emailContent);
             
-            scheduleTokenCleanup(tokenKey, 15 * 60 * 1000); // 15 minutes
+            scheduleTokenCleanup(tokenKey); // 15 minutes
             
             return "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư!";
             
@@ -321,14 +319,14 @@ public class UserServiceImpl implements UserService {
             entry.getKey().startsWith(email + "_") && entry.getValue().equals(token));
     }
 
-    private void scheduleTokenCleanup(String tokenKey, long delayMillis) {
+    private void scheduleTokenCleanup(String tokenKey) {
     Timer timer = new Timer();
     timer.schedule(new TimerTask() {
         @Override
         public void run() {
             resetTokens.remove(tokenKey);
         }
-    }, delayMillis);
+    }, 900000);
 }
         
    
